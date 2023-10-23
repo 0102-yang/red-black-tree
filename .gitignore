@@ -1,2 +1,6 @@
-/build
-/.cache
+# CMake
+/out
+CMakeSettings.json
+
+# Visual Studio
+/.vs
