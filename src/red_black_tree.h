@@ -7,7 +7,6 @@ namespace rbt
 
 #define RED_BLACK_TREE_TEMPLATE_ARGUMENT template <typename KeyType, typename ValueType, class KeyComparator>
 #define RED_BLACK_TREE_TYPE RedBlackTree<KeyType, ValueType, KeyComparator>
-#define REQUIRES_COMPARATOR requires is_comparator<KeyType, KeyComparator>
 
 template <typename KeyType, typename Comparator>
 concept is_comparator = requires(Comparator comparator, KeyType lhs, KeyType rhs) {
@@ -17,7 +16,9 @@ concept is_comparator = requires(Comparator comparator, KeyType lhs, KeyType rhs
 };
 
 // Todo: Need to add requires statement for KeyType.
-template <typename KeyType, typename ValueType, class KeyComparator = std::less<KeyType>> REQUIRES_COMPARATOR class RedBlackTree
+template <typename KeyType, typename ValueType, class KeyComparator = std::less<KeyType>>
+    requires std::default_initializable<KeyType> && std::equality_comparable<KeyType> && is_comparator<KeyType, KeyComparator>
+class RedBlackTree
 {
     /**
      * Red black tree color type.

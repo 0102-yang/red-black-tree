@@ -17,14 +17,12 @@ namespace rbt
  */
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 RED_BLACK_TREE_TYPE::~RedBlackTree()
 {
     Clear();
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
 {
     // If root is null.
@@ -72,7 +70,6 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
 {
     // TODO: Need to implement.
@@ -80,7 +77,6 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 auto RED_BLACK_TREE_TYPE::GetValue(const KeyType& key) -> std::pair<ValueType, bool>
 {
     RedBlackTreeNode* ptr = root_;
@@ -97,7 +93,6 @@ auto RED_BLACK_TREE_TYPE::GetValue(const KeyType& key) -> std::pair<ValueType, b
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 void RED_BLACK_TREE_TYPE::Clear()
 {
     std::stack<RedBlackTreeNode*> node_stack;
@@ -122,7 +117,6 @@ void RED_BLACK_TREE_TYPE::Clear()
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 void RED_BLACK_TREE_TYPE::PrintTree()
 {
     std::ostringstream os;
@@ -167,7 +161,6 @@ end:
  */
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 void RED_BLACK_TREE_TYPE::HandleReorient(const KeyType& key)
 {
     if (node_->left) {
@@ -203,7 +196,6 @@ void RED_BLACK_TREE_TYPE::HandleReorient(const KeyType& key)
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 void RED_BLACK_TREE_TYPE::HandleRotation(RedBlackTreeNode* parent_node, const KeyType& key)
 {
     if (key_comparator_(key, parent_node->key)) {
@@ -215,7 +207,6 @@ void RED_BLACK_TREE_TYPE::HandleRotation(RedBlackTreeNode* parent_node, const Ke
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 void RED_BLACK_TREE_TYPE::HandleRotationWithRoot(const KeyType& key)
 {
     if (key_comparator_(key, root_->key)) {
@@ -225,7 +216,6 @@ void RED_BLACK_TREE_TYPE::HandleRotationWithRoot(const KeyType& key)
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 auto RED_BLACK_TREE_TYPE::SingleRotationWithLeft(RedBlackTreeNode* root) -> RED_BLACK_TREE_TYPE::RedBlackTreeNode*
 {
     if (!root->left) {
@@ -241,7 +231,6 @@ auto RED_BLACK_TREE_TYPE::SingleRotationWithLeft(RedBlackTreeNode* root) -> RED_
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
-REQUIRES_COMPARATOR
 auto RED_BLACK_TREE_TYPE::SingleRotationWithRight(RedBlackTreeNode* root) -> RED_BLACK_TREE_TYPE::RedBlackTreeNode*
 {
     if (!root->right) {
