@@ -1,10 +1,20 @@
 #include <gtest/gtest.h>
 
-// Demonstrate some basic assertions.
-TEST(HelloTest, BasicAssertions)
+#include "red_black_tree.h"
+
+TEST(InsertTests, MultipleElementsInsertTest)
 {
-    // Expect two strings not to be equal.
-    EXPECT_STRNE("hello", "world");
-    // Expect equality.
-    EXPECT_EQ(7 * 6, 42);
+    rbt::RedBlackTree<int, int> tree;
+    std::array arr{10, 85, 15, 70, 20, 60, 30, 50, 65, 80, 90, 40, 5, 55};
+
+    // Insertion.
+    for (const int& e : arr) {
+        tree.Insert(e, e + 1);
+
+#ifdef DEBUG
+        tree.PrintTree();
+#endif
+    }
+
+    ASSERT_EQ(tree.Size(), arr.size());
 }

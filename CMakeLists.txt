@@ -8,28 +8,35 @@ IF (NOT CMAKE_BUILD_TYPE)
     MESSAGE(STATUS "Setting build type to `Debug` as none was specified.")
     SET(CMAKE_BUILD_TYPE "Debug")
 ENDIF ()
-
-# Compile settings.
-if (NOT SANITIZER)
-    set(SANITIZER address)
-endif ()
-
 message("Build mode: ${CMAKE_BUILD_TYPE}")
-message("${SANITIZER} sanitizer will be enabled in debug mode.")
 
-# Compiler flags.
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Werror")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-parameter -Wno-attributes")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fsanitize=${SANITIZER} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+# Debug settings.
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # Set address sanitizer.
+    set(SANITIZER address)
+    message("${SANITIZER} sanitizer will be enabled in debug mode.")
 
-message(STATUS "CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
+    # Compiler flags.
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Werror")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-parameter -Wno-attributes")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -ggdb -fsanitize=${SANITIZER} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+    message(STATUS "CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
 
-## Other Cmake modules.
+    # Add debug macros.
+    add_definitions(-DDEBUG)
+endif()
+
+# Release settings.
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    # Compiler flags.
+    message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
+endif()
+
+## Cmake modules.
 add_subdirectory(src)
 
 # Enable test.
 enable_testing()
-
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -38,5 +45,4 @@ FetchContent_Declare(
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
-
 add_subdirectory(test)

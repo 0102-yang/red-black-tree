@@ -1,8 +1,11 @@
 #include "red_black_tree.h"
 
+#ifdef DEBUG
 #include <iostream>
 #include <queue>
 #include <sstream>
+#endif
+
 #include <stack>
 
 namespace rbt
