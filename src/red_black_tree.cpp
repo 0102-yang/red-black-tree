@@ -46,30 +46,34 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
      * Insert key-value pair into red black tree.
      */
     // Find insertion place.
-    node_ = parent_node_ = grand_parent_node_ = grand_grand_parent_node_ = root_;
-    while (node_) {
+    RedBlackTreeNode* node = root_;
+    RedBlackTreeNode* parent_node = root_;
+    RedBlackTreeNode* grand_parent_node = root_;
+    RedBlackTreeNode* grand_grand_parent_node = root_;
+    // node_ = parent_node_ = grand_parent_node_ = grand_grand_parent_node_ = root_;
+    while (node) {
         // If node's left and right are red, need to reorient.
-        if (node_->left && node_->right && node_->left->color == ColorType::red && node_->right->color == ColorType::red) {
-            HandleReorient(key);
+        if (node->left && node->right && node->left->color == ColorType::red && node->right->color == ColorType::red) {
+            HandleReorient(grand_grand_parent_node, grand_parent_node, parent_node, node);
         }
 
-        grand_grand_parent_node_ = grand_parent_node_;
-        grand_parent_node_ = parent_node_;
-        parent_node_ = node_;
-        node_ = key_comparator_(key, node_->key) ? node_->left : node_->right;
+        grand_grand_parent_node = grand_parent_node;
+        grand_parent_node = parent_node;
+        parent_node = node;
+        node = key_comparator_(key, node->key) ? node->left : node->right;
     }
 
     // Insertion.
     size_++;
-    node_ = new RedBlackTreeNode{.key = key, .value = value, .color = ColorType::red};
-    if (key_comparator_(key, parent_node_->key)) {
-        parent_node_->left = node_;
+    node = new RedBlackTreeNode{.key = key, .value = value, .color = ColorType::red};
+    if (key_comparator_(key, parent_node->key)) {
+        parent_node->left = node;
     } else {
-        parent_node_->right = node_;
+        parent_node->right = node;
     }
 
     // Check if needs reorient.
-    HandleReorient(key);
+    HandleReorient(grand_grand_parent_node, grand_parent_node, parent_node, node);
 
     return true;
 }
@@ -103,6 +107,10 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 void RED_BLACK_TREE_TYPE::Clear()
 {
+    if (!root_) {
+        return;
+    }
+
     std::stack<RedBlackTreeNode*> node_stack;
     node_stack.push(root_);
 
@@ -146,7 +154,7 @@ void RED_BLACK_TREE_TYPE::PrintTree()
         }
 
         size_t count = 0;
-        for (const auto node : line) {
+        for (const auto& node : line) {
             if (node) {
                 print_queue.push(node->left);
                 print_queue.push(node->right);
@@ -175,92 +183,72 @@ end:
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
-void RED_BLACK_TREE_TYPE::HandleReorient(const KeyType& key)
+void RED_BLACK_TREE_TYPE::HandleReorient(RedBlackTreeNode* grand_grand_parent_node, RedBlackTreeNode* grand_parent_node, RedBlackTreeNode* parent_node,
+                                         RedBlackTreeNode* node)
 {
-    if (node_->left) {
-        node_->left->color = ColorType::black;
+    if (node->left) {
+        node->left->color = ColorType::black;
     }
-    if (node_->right) {
-        node_->right->color = ColorType::black;
+    if (node->right) {
+        node->right->color = ColorType::black;
     }
-    if (node_ == root_) {
+    if (node == root_) {
         return;
     }
 
-    node_->color = ColorType::red;
-    if (parent_node_->color == ColorType::red) {
+    node->color = ColorType::red;
+    if (parent_node->color == ColorType::red) {
         // Need to rotate.
-        grand_parent_node_->color = ColorType::red;
+        grand_parent_node->color = ColorType::red;
 
         // Check if needs double rotation.
+        bool is_unique_rotate = true;
         // First rotation.
-        if (key_comparator_(key, grand_parent_node_->key) != key_comparator_(key, parent_node_->key)) {
-            HandleRotation(grand_parent_node_, key);
+        if (key_comparator_(parent_node->key, grand_parent_node->key) != key_comparator_(node->key, parent_node->key)) {
+            HandleRotation(parent_node, node);
+            HandleReconnection(grand_parent_node, node);
+            is_unique_rotate = false;
         }
 
         // Second rotation.
-        if (grand_parent_node_ == root_) {
-            HandleRotationWithRoot(key);
+        is_unique_rotate ? HandleRotation(grand_parent_node, parent_node) : HandleRotation(grand_parent_node, node);
+        if (grand_parent_node == root_) {
+            root_ = is_unique_rotate ? parent_node : node;
         } else {
-            HandleRotation(grand_grand_parent_node_, key);
+            is_unique_rotate ? HandleReconnection(grand_grand_parent_node, parent_node) : HandleReconnection(grand_grand_parent_node, node);
         }
 
-        node_->color = ColorType::black;
+        (is_unique_rotate ? parent_node->color : node->color) = ColorType::black;
     }
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
-void RED_BLACK_TREE_TYPE::HandleRotation(RedBlackTreeNode* parent_node, const KeyType& key)
+void RED_BLACK_TREE_TYPE::HandleRotation(RedBlackTreeNode* root, RedBlackTreeNode* sup)
 {
-    if (key_comparator_(key, parent_node->key)) {
-        node_ = parent_node->left =
-            key_comparator_(key, parent_node->left->key) ? SingleRotationWithLeft(parent_node->left) : SingleRotationWithRight(parent_node->left);
+    if (!sup) {
+        return;
+}
+
+    auto rotate = [](RedBlackTreeNode* r, bool is_left_rotation) {
+        RedBlackTreeNode* new_root = is_left_rotation ? r->left : r->right;
+        if (is_left_rotation) {
+            r->left = new_root->right;
+            new_root->right = r;
+        } else {
+            r->right = new_root->left;
+            new_root->left = r;
     }
-    node_ = parent_node->right =
-        key_comparator_(key, parent_node->right->key) ? SingleRotationWithLeft(parent_node->right) : SingleRotationWithRight(parent_node->right);
+    };
+
+    key_comparator_(sup->key, root->key) ? rotate(root, true) : rotate(root, false);
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
-void RED_BLACK_TREE_TYPE::HandleRotationWithRoot(const KeyType& key)
+void RED_BLACK_TREE_TYPE::HandleReconnection(RedBlackTreeNode* parent, RedBlackTreeNode* node)
 {
-    if (key_comparator_(key, root_->key)) {
-        node_ = root_ = SingleRotationWithLeft(root_);
-    }
-    node_ = root_ = SingleRotationWithRight(root_);
-}
-
-RED_BLACK_TREE_TEMPLATE_ARGUMENT
-RED_BLACK_TREE_REQUIRES
-auto RED_BLACK_TREE_TYPE::SingleRotationWithLeft(RedBlackTreeNode* root) -> RED_BLACK_TREE_TYPE::RedBlackTreeNode*
-{
-    if (!root->left) {
-        return root;
-    }
-
-    // Rotate.
-    RedBlackTreeNode* new_root = root->left;
-    root->left = new_root->right;
-    new_root->right = root;
-
-    return new_root;
-}
-
-RED_BLACK_TREE_TEMPLATE_ARGUMENT
-RED_BLACK_TREE_REQUIRES
-auto RED_BLACK_TREE_TYPE::SingleRotationWithRight(RedBlackTreeNode* root) -> RED_BLACK_TREE_TYPE::RedBlackTreeNode*
-{
-    if (!root->right) {
-        return root;
-    }
-
-    // Rotate.
-    RedBlackTreeNode* new_root = root->right;
-    root->right = new_root->left;
-    new_root->left = root;
-
-    return new_root;
+    (key_comparator_(node->key, parent->key) ? parent->left : parent->right) = node;
 }
 
 template class RedBlackTree<int, int>;

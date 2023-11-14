@@ -102,50 +102,33 @@ public:
 
 private:
     RedBlackTreeNode* root_ = nullptr;
-    KeyComparator key_comparator_{};
     size_t size_ = 0;
-
-    /**
-     * For handle reorient.
-     */
-
-    RedBlackTreeNode* node_ = nullptr;
-    RedBlackTreeNode* parent_node_ = nullptr;
-    RedBlackTreeNode* grand_parent_node_ = nullptr;
-    RedBlackTreeNode* grand_grand_parent_node_ = nullptr;
+    KeyComparator key_comparator_{};
 
     /// <summary>
     /// Handle reorient for red-black tree.
     /// </summary>
-    /// <param name="key">The key.</param>
-    void HandleReorient(const KeyType& key);
+    /// <param name="grand_grand_parent_node"></param>
+    /// <param name="grand_parent_node"></param>
+    /// <param name="parent_node"></param>
+    /// <param name="node"></param>
+    void HandleReorient(RedBlackTreeNode* grand_grand_parent_node, RedBlackTreeNode* grand_parent_node, RedBlackTreeNode* parent_node, RedBlackTreeNode* node);
 
     /// <summary>
-    /// Handle rotation without changing red-black tree root.
+    /// Handle rotation between root node and sup node,
+    /// which sup is one child of root.
     /// </summary>
-    /// <param name="parent_node">Parent node for reconnect nodes.</param>
-    /// <param name="key">The key.</param>
-    void HandleRotation(RedBlackTreeNode* parent_node, const KeyType& key);
-
-    /// <summary>
-    /// Handle rotation without changing red-black tree root.
-    /// </summary>
-    /// <param name="key">The key.</param>
-    void HandleRotationWithRoot(const KeyType& key);
-
-    /// <summary>
-    /// Single rotation with root and root->left.
-    /// </summary>
-    /// <param name="root">Original root.</param>
+    /// <param name="root">The root.</param>
+    /// <param name="sup">The sup.</param>
     /// <returns>The new root.</returns>
-    RedBlackTreeNode* SingleRotationWithLeft(RedBlackTreeNode* root);
+    void HandleRotation(RedBlackTreeNode* root, RedBlackTreeNode* sup);
 
     /// <summary>
-    /// Single rotation with root and root->right.
+    /// Reconnect node and its parent.
     /// </summary>
-    /// <param name="root">Original root.</param>
-    /// <returns>The new root.</returns>
-    RedBlackTreeNode* SingleRotationWithRight(RedBlackTreeNode* root);
+    /// <param name="parent">The parent.</param>
+    /// <param name="node">The node.</param>
+    void HandleReconnection(RedBlackTreeNode* parent, RedBlackTreeNode* node);
 };
 
 } // namespace rbt
