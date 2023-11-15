@@ -1,11 +1,16 @@
 #include <gtest/gtest.h>
 
+#include <random>
+
 #include "red_black_tree.h"
 
 TEST(InsertTests, EmptyTest)
 {
     rbt::RedBlackTree<int, int> tree;
     ASSERT_EQ(tree.IsEmpty(), true);
+#ifdef DEBUG
+    ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
+#endif
 }
 
 TEST(InsertTests, SimpleInsertTest)
@@ -16,6 +21,9 @@ TEST(InsertTests, SimpleInsertTest)
     tree.Insert(1, 1);
     ASSERT_EQ(tree.IsEmpty(), false);
     ASSERT_EQ(tree.Size(), 1);
+#ifdef DEBUG
+    ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
+#endif
 }
 
 TEST(InsertTests, MultipleElementsInsertTest)
@@ -26,6 +34,9 @@ TEST(InsertTests, MultipleElementsInsertTest)
     // Insertion.
     for (const int& e : arr) {
         tree.Insert(e, e + 1);
+#ifdef DEBUG
+        ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
+#endif
     }
     ASSERT_EQ(tree.Size(), arr.size());
 
@@ -46,5 +57,21 @@ TEST(InsertTests, MultipleElementsInsertTest)
     {
         auto [value, flag] = tree.GetValue(88);
         ASSERT_EQ(flag, false);
+    }
+}
+
+TEST(InsertTests, MultipleRandomElementsInsertTest)
+{
+    rbt::RedBlackTree<int, int> tree;
+
+    // Insertion.
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution dist(10000, 99999);
+
+    for (int i = 0; i < 1000; ++i) {
+        int random_number = dist(mt);
+        tree.Insert(random_number, random_number * 2);
+        ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
     }
 }
