@@ -26,7 +26,6 @@ TEST(InsertTests, MultipleElementsInsertTest)
     // Insertion.
     for (const int& e : arr) {
         tree.Insert(e, e + 1);
-        tree.PrintTree();
     }
     ASSERT_EQ(tree.Size(), arr.size());
 

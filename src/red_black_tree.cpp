@@ -75,6 +75,10 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
     // Check if needs reorient.
     HandleReorient(grand_grand_parent_node, grand_parent_node, parent_node, node);
 
+#ifdef DEBUG
+    PrintTree();
+#endif
+
     return true;
 }
 
