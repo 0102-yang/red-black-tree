@@ -179,6 +179,47 @@ end:
     std::cout << os.str() << std::endl;
 }
 
+RED_BLACK_TREE_TEMPLATE_ARGUMENT
+RED_BLACK_TREE_REQUIRES
+bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
+{
+    // Todo: Need to implement.
+    // 1. Root is always black.
+    if (!root_) {
+        return true;
+    }
+
+    if (root_->color != ColorType::black) {
+        return false;
+    }
+
+    // 2. If a node is red, its child nodes must be black.
+    std::stack<RedBlackTreeNode*> node_stack;
+    node_stack.push(root_);
+
+    while (!node_stack.empty()) {
+        RedBlackTreeNode* ptr = node_stack.top();
+        node_stack.pop();
+
+        if (ptr->color == ColorType::red && !(IsBlackNode(ptr->left) && IsBlackNode(ptr->right))) {
+            return false;
+        }
+
+        if (ptr->left) {
+            node_stack.push(ptr->left);
+        }
+        if (ptr->right) {
+            node_stack.push(ptr->right);
+        }
+    }
+
+    // 3. Every path from a node to a null node must contain the same number of black nodes.
+    std::vector<int> all_black_path_nodes_count;
+    all_black_path_nodes_count.reserve(size_);
+    ComputeAllBlackPathHeight(root_, 1, all_black_path_nodes_count);
+    return std::adjacent_find(all_black_path_nodes_count.begin(), all_black_path_nodes_count.end(), std::not_equal_to()) == all_black_path_nodes_count.end();
+}
+
 #endif
 
 /**

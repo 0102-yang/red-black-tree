@@ -129,6 +129,33 @@ private:
     /// <param name="parent">The parent.</param>
     /// <param name="node">The node.</param>
     void HandleReconnection(RedBlackTreeNode* parent, RedBlackTreeNode* node);
+
+    /// <summary>
+    /// Check if a node's color is black.
+    /// </summary>
+    /// <param name="node">The node.</param>
+    /// <param name="can_be_null">Whether this node can be a black null node</param>
+    /// <returns>True for is.</returns>
+    bool IsBlackNode(RedBlackTreeNode* node, bool can_be_null = true)
+    {
+        return can_be_null ? (!node || node->color == ColorType::black) : (node && node->color == ColorType::black);
+    }
+
+    /// <summary>
+    /// Compute all black path height of the red-black-tree.
+    /// </summary>
+    /// <param name="root">The root.</param>
+    /// <param name="current_black_height">The current black height.</param>
+    /// <param name="all_black_height">All black height array.</param>
+    void ComputeAllBlackPathHeight(RedBlackTreeNode* root, const int current_black_height, std::vector<int>& all_black_height)
+    {
+        if (!root) {
+            all_black_height.push_back(current_black_height);
+            return;
+        }
+        ComputeAllBlackPathHeight(root->left, IsBlackNode(root, false) ? current_black_height + 1 : current_black_height, all_black_height);
+        ComputeAllBlackPathHeight(root->right, IsBlackNode(root, false) ? current_black_height + 1 : current_black_height, all_black_height);
+    }
 };
 
 } // namespace rbt
