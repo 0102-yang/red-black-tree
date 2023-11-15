@@ -47,9 +47,9 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
      */
     // Find insertion place.
     RedBlackTreeNode* node = root_;
-    RedBlackTreeNode* parent_node = root_;
-    RedBlackTreeNode* grand_parent_node = root_;
-    RedBlackTreeNode* grand_grand_parent_node = root_;
+    RedBlackTreeNode* parent_node = nullptr;
+    RedBlackTreeNode* grand_parent_node = nullptr;
+    RedBlackTreeNode* grand_grand_parent_node = nullptr;
     // node_ = parent_node_ = grand_parent_node_ = grand_grand_parent_node_ = root_;
     while (node) {
         // If node's left and right are red, need to reorient.
@@ -216,11 +216,7 @@ void RED_BLACK_TREE_TYPE::HandleReorient(RedBlackTreeNode* grand_grand_parent_no
 
         // Second rotation.
         is_unique_rotate ? HandleRotation(grand_parent_node, parent_node) : HandleRotation(grand_parent_node, node);
-        if (grand_parent_node == root_) {
-            root_ = is_unique_rotate ? parent_node : node;
-        } else {
             is_unique_rotate ? HandleReconnection(grand_grand_parent_node, parent_node) : HandleReconnection(grand_grand_parent_node, node);
-        }
 
         (is_unique_rotate ? parent_node->color : node->color) = ColorType::black;
     }
@@ -252,7 +248,13 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 void RED_BLACK_TREE_TYPE::HandleReconnection(RedBlackTreeNode* parent, RedBlackTreeNode* node)
 {
+    if (parent) {
+        // Just reconnect to parent.
     (key_comparator_(node->key, parent->key) ? parent->left : parent->right) = node;
+    } else {
+        // Need to reconnect to root_.
+        root_ = node;
+    }
 }
 
 template class RedBlackTree<int, int>;
