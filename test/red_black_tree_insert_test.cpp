@@ -60,18 +60,11 @@ TEST(InsertTests, MultipleElementsInsertTest)
     }
 }
 
-TEST(InsertTests, MultipleRandomElementsInsertTest)
+TEST(InsertTests, OrderedElementsInsertTests)
 {
     rbt::RedBlackTree<int, int> tree;
-
-    // Insertion.
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_int_distribution dist(10000, 99999);
-
-    for (int i = 0; i < 1000; ++i) {
-        int random_number = dist(mt);
-        tree.Insert(random_number, random_number * 2);
+    for (int i = 0; i < 1000; i++) {
+        tree.Insert(i, i * i);
         ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
     }
 }
