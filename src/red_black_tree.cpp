@@ -75,10 +75,6 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
     // Check if needs reorient.
     HandleReorient(grand_grand_parent_node, grand_parent_node, parent_node, node);
 
-#ifdef DEBUG
-    PrintTree();
-#endif
-
     return true;
 }
 
@@ -183,7 +179,6 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
 {
-    // Todo: Need to implement.
     // 1. Root is always black.
     if (!root_) {
         return true;
