@@ -37,11 +37,6 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
         return true;
     }
 
-    // If key is duplicated.
-    if (auto [_, success] = GetValue(key); success) {
-        return false;
-    }
-
     /**
      * Insert key-value pair into red black tree.
      */
@@ -50,8 +45,11 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
     RedBlackTreeNode* parent_node = nullptr;
     RedBlackTreeNode* grand_parent_node = nullptr;
     RedBlackTreeNode* grand_grand_parent_node = nullptr;
-    // node_ = parent_node_ = grand_parent_node_ = grand_grand_parent_node_ = root_;
     while (node) {
+        if (node->key == key) {
+            return false;
+        }
+
         // If node's left and right are red, need to reorient.
         if (node->left && node->right && node->left->color == ColorType::red && node->right->color == ColorType::red) {
             HandleReorient(grand_grand_parent_node, grand_parent_node, parent_node, node);
