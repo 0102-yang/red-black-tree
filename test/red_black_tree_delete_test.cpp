@@ -56,11 +56,11 @@ TEST(DeleteTests, MultipleElementsDeleteTest)
 TEST(DeleteTests, OrderedElementsDeleteTests)
 {
     rbt::RedBlackTree<int, int> tree;
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 1000; i++) {
         tree.Insert(i, i * i);
     }
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 1000; i++) {
         tree.Erase(i);
         ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
     }
