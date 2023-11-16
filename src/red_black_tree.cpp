@@ -82,8 +82,115 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
 {
-    // TODO: Need to implement.
-    return true;
+    auto find_min_leaf_node = [](RedBlackTreeNode* root) -> RedBlackTreeNode* {
+        while (root->left) {
+            root = root->left;
+        }
+        return root;
+    };
+    auto find_max_leaf_node = [](RedBlackTreeNode* root) -> RedBlackTreeNode* {
+        while (root->right) {
+            root = root->right;
+        }
+        return root;
+    };
+    auto is_red_node = [](RedBlackTreeNode* n) { return n && n->color == ColorType::red; };
+
+    RedBlackTreeNode* node = root_;
+    RedBlackTreeNode* parent_node = nullptr;
+    RedBlackTreeNode* grand_parent_node = nullptr;
+    node->color = ColorType::red;
+    while (node) {
+        if (IsBlackNode(node, false)) {
+            // Node is black, need to change node's color to red somehow.
+            RedBlackTreeNode* sibling_node = parent_node ? (parent_node->left == node ? parent_node->right : parent_node->left) : nullptr;
+            if (is_red_node(sibling_node)) {
+                // Sibling_node are red, node is black,
+                // need rotate.
+                HandleRotation(parent_node, sibling_node);
+                HandleReconnection(grand_parent_node, sibling_node);
+                sibling_node->color = ColorType::black;
+                parent_node->color = ColorType::red;
+                continue;
+            }
+
+            if (IsBlackNode(node->left) && IsBlackNode(node->right)) {
+                // Sibling_node is black, both node left child and right child are black.
+                if (sibling_node && (is_red_node(sibling_node->left) || is_red_node(sibling_node->right))) {
+                    // Sibling_node is not null and at least one child of sibling_node is red.
+                    RedBlackTreeNode* sibling_node_red_child = IsBlackNode(sibling_node->left) ? sibling_node->right : sibling_node->left;
+                    bool is_unique_rotate = true;
+
+                    // First rotation.
+                    if (key_comparator_(node->key, parent_node->key) == key_comparator_(sibling_node_red_child->key, sibling_node->key)) {
+                        HandleRotation(sibling_node, sibling_node_red_child);
+                        HandleReconnection(parent_node, sibling_node_red_child);
+                        is_unique_rotate = false;
+                    }
+
+                    // Second rotation.
+                    is_unique_rotate ? HandleRotation(parent_node, sibling_node) : HandleRotation(parent_node, sibling_node_red_child);
+                    is_unique_rotate ? HandleReconnection(grand_parent_node, sibling_node) : HandleReconnection(grand_parent_node, sibling_node_red_child);
+
+                    // Recolor.
+                    node->color = ColorType::red;
+                    parent_node->color = ColorType::black;
+                    if (is_unique_rotate) {
+                        sibling_node->color = ColorType::red;
+                        sibling_node_red_child->color = ColorType::black;
+                    }
+                } else {
+                    // The sibling_node is black or both child of sibling_node are black.
+                    // Flip parent_node, node, sibling_node color.
+                    parent_node->color = ColorType::black;
+                    node->color = ColorType::red;
+                    if (sibling_node) {
+                        sibling_node->color = ColorType::red;
+                    }
+                }
+            }
+        }
+
+        bool is_replaced = false;
+        if (node->key == key) {
+            if (!node->left && !node->right) {
+                // Node is a leaf node, just delete node.
+                if (parent_node) {
+                    // Deleted node is not root.
+                    (parent_node->left == node ? parent_node->left : parent_node->right) = nullptr;
+                } else {
+                    // Deleted node is root and node is the unique node.
+                    root_ = nullptr;
+                }
+
+                // Delete.
+                delete node;
+                size_--;
+
+                // Tail work.
+                if (root_) {
+                    root_->color = ColorType::black;
+                }
+                return true;
+            }
+
+            // Note: It might be possible to minimize copy cost assumption.
+            // Node is a internal node.
+            // Need to replace node with its successor or predecessor.
+            auto replace_node = node->right ? find_min_leaf_node(node->right) : find_max_leaf_node(node->left);
+            std::swap(node->key, replace_node->key);
+            std::swap(node->value, replace_node->value);
+            is_replaced = true;
+        }
+
+        // Iteration.
+        grand_parent_node = parent_node;
+        parent_node = node;
+        node = key_comparator_(key, node->key) ^ is_replaced ? node->left : node->right;
+    }
+
+    root_->color = ColorType::black;
+    return false;
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
@@ -252,7 +359,7 @@ void RED_BLACK_TREE_TYPE::HandleReorient(RedBlackTreeNode* grand_grand_parent_no
 
         // Second rotation.
         is_unique_rotate ? HandleRotation(grand_parent_node, parent_node) : HandleRotation(grand_parent_node, node);
-            is_unique_rotate ? HandleReconnection(grand_grand_parent_node, parent_node) : HandleReconnection(grand_grand_parent_node, node);
+        is_unique_rotate ? HandleReconnection(grand_grand_parent_node, parent_node) : HandleReconnection(grand_grand_parent_node, node);
 
         (is_unique_rotate ? parent_node->color : node->color) = ColorType::black;
     }
@@ -264,7 +371,7 @@ void RED_BLACK_TREE_TYPE::HandleRotation(RedBlackTreeNode* root, RedBlackTreeNod
 {
     if (!sup) {
         return;
-}
+    }
 
     auto rotate = [](RedBlackTreeNode* r, bool is_left_rotation) {
         RedBlackTreeNode* new_root = is_left_rotation ? r->left : r->right;
@@ -274,7 +381,7 @@ void RED_BLACK_TREE_TYPE::HandleRotation(RedBlackTreeNode* root, RedBlackTreeNod
         } else {
             r->right = new_root->left;
             new_root->left = r;
-    }
+        }
     };
 
     key_comparator_(sup->key, root->key) ? rotate(root, true) : rotate(root, false);
@@ -286,7 +393,7 @@ void RED_BLACK_TREE_TYPE::HandleReconnection(RedBlackTreeNode* parent, RedBlackT
 {
     if (parent) {
         // Just reconnect to parent.
-    (key_comparator_(node->key, parent->key) ? parent->left : parent->right) = node;
+        (key_comparator_(node->key, parent->key) ? parent->left : parent->right) = node;
     } else {
         // Need to reconnect to root_.
         root_ = node;

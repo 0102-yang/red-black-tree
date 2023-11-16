@@ -98,6 +98,13 @@ public:
     /// Print red black tree.
     /// </summary>
     void PrintTree();
+
+    /// <summary>
+    /// Check 3(actual and original 4) rules in red-black-tree.
+    /// </summary>
+    /// <returns>True for check success.</returns>
+    bool RedBlackTreeRulesCheck();
+
 #endif
 
 private:
