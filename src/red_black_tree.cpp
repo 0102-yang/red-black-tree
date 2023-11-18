@@ -193,7 +193,7 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
-auto RED_BLACK_TREE_TYPE::GetValue(const KeyType& key) -> std::pair<ValueType, bool>
+auto RED_BLACK_TREE_TYPE::GetValue(const KeyType& key) const -> std::pair<ValueType, bool>
 {
     RedBlackTreeNode* ptr = root_;
 

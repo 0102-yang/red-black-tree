@@ -70,7 +70,7 @@ public:
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns>ValueType-bool pair indicates value and success flag.</returns>
-    auto GetValue(const KeyType& key) -> std::pair<ValueType, bool>;
+    auto GetValue(const KeyType& key) const -> std::pair<ValueType, bool>;
 
     /// <summary>
     /// Clear all elements from red-black tree.
