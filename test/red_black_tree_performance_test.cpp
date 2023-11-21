@@ -55,7 +55,8 @@ TEST(PerformanceTest, RandomElementsInsertAndGetTest)
             m.insert({random_number, random_number});
         }
         for (int i = 0; i < iterate_time; ++i) {
-            auto it = m.find(i);
+            int random_number = dist(mt);
+            auto it = m.find(random_number);
         }
     }
     auto end = std::chrono::steady_clock().now();
@@ -70,7 +71,8 @@ TEST(PerformanceTest, RandomElementsInsertAndGetTest)
             t.Insert(random_number, random_number);
         }
         for (int i = 0; i < iterate_time; ++i) {
-            auto [it, flag] = t.GetValue(i);
+            int random_number = dist(mt);
+            auto [it, flag] = t.GetValue(random_number);
         }
     }
     end = std::chrono::steady_clock().now();
