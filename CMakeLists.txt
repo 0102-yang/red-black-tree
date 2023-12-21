@@ -1,49 +1,70 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
-SET(CMAKE_CXX_STANDARD 20)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-PROJECT(RedBlackTree LANGUAGES C CXX VERSION 1.0)
+cmake_minimum_required(VERSION 3.19)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(RedBlackTree LANGUAGES CXX VERSION 1.0)
 
-# Default build type is Debug.
-IF (NOT CMAKE_BUILD_TYPE)
-    MESSAGE(STATUS "Setting build type to `Debug` as none was specified.")
-    SET(CMAKE_BUILD_TYPE "Debug")
-ENDIF ()
+message("Build operating System: ${CMAKE_SYSTEM}")
 message("Build mode: ${CMAKE_BUILD_TYPE}")
 
-# Debug settings.
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    # Set address sanitizer.
-    set(SANITIZER address)
-    message("${SANITIZER} sanitizer will be enabled in debug mode.")
+option(BUILD_TESTS "Build red-black-tree essential tests." $<CONFIG:Debug>)
+option(BUILD_BENCHMARK "Build red-black-tree performance benchmark." OFF)
 
-    # Compiler flags.
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Werror")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-parameter -Wno-attributes")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -fsanitize=${SANITIZER} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-    message(STATUS "CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
-
-    # Add debug macros.
-    add_definitions(-DDEBUG)
-endif()
-
-# Release settings.
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    # Compiler flags.
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
-    message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
-endif()
-
-## Cmake modules.
-add_subdirectory(src)
+## Build red-black-tree.
+add_library(red_black_tree OBJECT)
+target_sources(red_black_tree PRIVATE ${PROJECT_SOURCE_DIR}/src/red_black_tree.cpp)
+target_compile_options(red_black_tree
+    PRIVATE
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:
+            $<$<CONFIG:Debug>:-Wall -Wextra -Werror -Wno-unused-parameter -Wno-attributes -fno-omit-frame-pointer -fno-optimize-sibling-calls>
+        >
+)
+target_compile_definitions(red_black_tree PRIVATE $<$<CONFIG:Debug>:DEBUG>)
+target_include_directories(red_black_tree PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
 # Enable test.
-enable_testing()
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-add_subdirectory(test)
+if(BUILD_TESTS)
+    message("Enable tests.")
+    enable_testing()
+
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    set(install_gtest OFF)
+    set(install_gmock OFF)
+    set(build_gmock ON)
+
+    add_subdirectory(third_party/googletest)
+
+    include(GoogleTest)
+    set(TESTS_ROOT_DIR ${PROJECT_SOURCE_DIR}/test)
+
+    add_executable(
+      red_black_tree_insert_test
+      ${TESTS_ROOT_DIR}/red_black_tree_insert_test.cpp
+    )
+    add_executable(
+      red_black_tree_delete_test
+      ${TESTS_ROOT_DIR}/red_black_tree_delete_test.cpp
+    )
+
+    target_compile_definitions(red_black_tree_insert_test PRIVATE $<$<CONFIG:Debug>:DEBUG>)
+    target_compile_definitions(red_black_tree_delete_test PRIVATE $<$<CONFIG:Debug>:DEBUG>)
+
+    find_package(GTest)
+    target_link_libraries(red_black_tree_insert_test red_black_tree GTest::gtest GTest::gtest_main GTest::gmock
+                            GTest::gmock_main)
+    target_link_libraries(red_black_tree_delete_test red_black_tree GTest::gtest GTest::gtest_main GTest::gmock
+                            GTest::gmock_main)
+
+    gtest_discover_tests(red_black_tree_insert_test)
+    gtest_discover_tests(red_black_tree_delete_test)
+endif()
+
+# Enable benchmark.
+if(BUILD_BENCHMARK)
+    message("Build benchmark.")
+
+    add_executable(
+      performance
+      ${PROJECT_SOURCE_DIR}/bench/performance.cpp
+    )
+    target_link_libraries(performance red_black_tree)
+endif()
