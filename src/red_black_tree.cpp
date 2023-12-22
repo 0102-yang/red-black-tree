@@ -173,7 +173,7 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
             }
 
             // Note: It might be possible to minimize copy cost assumption.
-            // Node is a internal node.
+            // Node is an internal node.
             // Need to replace node with its successor or predecessor.
             auto replace_node = node->right ? find_min_leaf_node(node->right) : find_max_leaf_node(node->left);
             std::swap(node->key, replace_node->key);
@@ -346,7 +346,7 @@ void RED_BLACK_TREE_TYPE::HandleReorient(RedBlackTreeNode* grand_grand_parent_no
         // Need to rotate.
         grand_parent_node->color = ColorType::red;
 
-        // Check if needs double rotation.
+        // Check if it needs double rotation.
         bool is_unique_rotate = true;
         // First rotation.
         if (key_comparator_(parent_node->key, grand_parent_node->key) != key_comparator_(node->key, parent_node->key)) {
