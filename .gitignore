@@ -1,6 +1,8 @@
 # CMake
-/out
-CMakeSettings.json
+/build
 
 # Visual Studio
 /.vs
+
+# Jetbrain Resharper
+Folder.DotSettings.user

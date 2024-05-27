@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows test",
+      "displayName": "Windows Test",
+      "description": "Test on windows platform",
+      "hidden": false,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+        "BUILD_TESTS": "YES",
+        "BUILD_BENCHMARK": "NO"
+      }
+    }
+  ]
+}
