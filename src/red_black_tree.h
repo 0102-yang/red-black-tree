@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <functional>
 
 namespace rbt
@@ -7,10 +8,10 @@ namespace rbt
 
 #define RED_BLACK_TREE_TEMPLATE_ARGUMENT template <typename KeyType, typename ValueType, class KeyComparator>
 #define RED_BLACK_TREE_TYPE RedBlackTree<KeyType, ValueType, KeyComparator>
-#define RED_BLACK_TREE_REQUIRES requires std::default_initializable<KeyType> && std::equality_comparable<KeyType> && is_comparator<KeyType, KeyComparator>
+#define RED_BLACK_TREE_REQUIRES requires std::default_initializable<KeyType> && std::equality_comparable<KeyType> && IsComparator<KeyType, KeyComparator>
 
 template <typename KeyType, typename Comparator>
-concept is_comparator = requires(Comparator comparator, KeyType lhs, KeyType rhs) {
+concept IsComparator = requires(Comparator comparator, KeyType lhs, KeyType rhs) {
     {
         comparator(lhs, rhs)
     } -> std::convertible_to<bool>;
@@ -24,17 +25,17 @@ template <typename KeyType, typename ValueType, class KeyComparator = std::less<
      */
     enum class ColorType : bool
     {
-        red,
-        black
+        Red,
+        Black
     };
 
     struct RedBlackTreeNode
     {
-        KeyType key = {};
-        ValueType value = {};
-        RedBlackTreeNode* left = nullptr;
-        RedBlackTreeNode* right = nullptr;
-        ColorType color = ColorType::red;
+        KeyType Key = {};
+        ValueType Value = {};
+        RedBlackTreeNode* Left = nullptr;
+        RedBlackTreeNode* Right = nullptr;
+        ColorType Color = ColorType::red;
     };
 
 public:
@@ -48,7 +49,10 @@ public:
 
     auto operator=(RedBlackTree&&) noexcept -> RedBlackTree& = delete;
 
-    ~RedBlackTree();
+    ~RedBlackTree() noexcept
+    {
+        Clear();
+    }
 
     /// <summary>
     /// Insert a key-value pair into red-black tree.
@@ -142,10 +146,10 @@ private:
     /// </summary>
     /// <param name="node">The node.</param>
     /// <param name="can_be_null">Whether this node can be a black null node</param>
-    /// <returns>True for is.</returns>
+    /// <returns>True for node is black.</returns>
     bool IsBlackNode(RedBlackTreeNode* node, bool can_be_null = true)
     {
-        return can_be_null ? (!node || node->color == ColorType::black) : (node && node->color == ColorType::black);
+        return can_be_null ? (!node || node->Color == ColorType::Black) : (node && node->Color == ColorType::Black);
     }
 
     /// <summary>
@@ -160,8 +164,8 @@ private:
             all_black_height.push_back(current_black_height);
             return;
         }
-        ComputeAllBlackPathHeight(root->left, IsBlackNode(root, false) ? current_black_height + 1 : current_black_height, all_black_height);
-        ComputeAllBlackPathHeight(root->right, IsBlackNode(root, false) ? current_black_height + 1 : current_black_height, all_black_height);
+        ComputeAllBlackPathHeight(root->Left, IsBlackNode(root, false) ? current_black_height + 1 : current_black_height, all_black_height);
+        ComputeAllBlackPathHeight(root->Right, IsBlackNode(root, false) ? current_black_height + 1 : current_black_height, all_black_height);
     }
 };
 
