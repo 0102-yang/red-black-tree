@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <functional>
+#include <optional>
 
 namespace rbt
 {
@@ -74,7 +75,7 @@ public:
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns>ValueType-bool pair indicates value and success flag.</returns>
-    auto GetValue(const KeyType& key) const -> std::pair<ValueType, bool>;
+    [[nodiscard]] auto GetValue(const KeyType& key) const -> std::optional<ValueType>;
 
     /// <summary>
     /// Clear all elements from red-black tree.
@@ -149,7 +150,7 @@ private:
     /// <returns>True for node is black.</returns>
     bool IsBlackNode(RedBlackTreeNode* node, bool can_be_null = true)
     {
-        return can_be_null ? (!node || node->Color == ColorType::Black) : (node && node->Color == ColorType::Black);
+        return can_be_null ? !node || node->Color == ColorType::Black : node && node->Color == ColorType::Black;
     }
 
     /// <summary>
@@ -166,6 +167,19 @@ private:
         }
         ComputeAllBlackPathHeight(root->Left, IsBlackNode(root, false) ? current_black_height + 1 : current_black_height, all_black_height);
         ComputeAllBlackPathHeight(root->Right, IsBlackNode(root, false) ? current_black_height + 1 : current_black_height, all_black_height);
+    }
+
+
+    /**
+     * Get the next node in the red-black tree based on the given key.
+     * 
+     * @param node The current node.
+     * @param key The key to compare with.
+     * @return The next node in the red-black tree.
+     */
+    auto NextNode(RedBlackTreeNode* node, const KeyType& key) const -> RedBlackTreeNode*
+    {
+        return key_comparator_(key, node->Key) ? node->Left : node->Right;
     }
 };
 

@@ -51,7 +51,7 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
         grand_grand_parent_node = grand_parent_node;
         grand_parent_node = parent_node;
         parent_node = node;
-        node = key_comparator_(key, node->Key) ? node->Left : node->Right;
+        node = NextNode(node, key);
     }
 
     // Insertion.
@@ -188,19 +188,19 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
-auto RED_BLACK_TREE_TYPE::GetValue(const KeyType& key) const -> std::pair<ValueType, bool>
+auto RED_BLACK_TREE_TYPE::GetValue(const KeyType& key) const -> std::optional<ValueType>
 {
     RedBlackTreeNode* ptr = root_;
 
     while (ptr) {
         if (key == ptr->Key) {
-            return {ptr->Value, true};
+            return std::make_optional(ptr->Value);
         }
 
-        ptr = key_comparator_(key, ptr->Key) ? ptr->Left : ptr->Right;
+        ptr = NextNode(ptr, key);
     }
 
-    return {{}, false};
+    return std::nullopt;
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT

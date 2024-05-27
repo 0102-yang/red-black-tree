@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <array>
 #include <random>
 
 #include "red_black_tree.h"
@@ -14,12 +15,12 @@ TEST(DeleteTests, SimpleDeleteTest)
     ASSERT_EQ(tree.Erase(65), false);
     ASSERT_EQ(tree.Erase(42), true);
     {
-        auto [_, flag] = tree.GetValue(42);
-        ASSERT_EQ(flag, false);
+        const auto value = tree.GetValue(42);
+        ASSERT_EQ(value.has_value(), false);
     }
     {
-        auto [_, flag] = tree.GetValue(100);
-        ASSERT_EQ(flag, true);
+        const auto value = tree.GetValue(100);
+        ASSERT_EQ(value.has_value(), true);
     }
     ASSERT_EQ(tree.Size(), 1);
 #ifdef DEBUG
@@ -36,7 +37,7 @@ TEST(DeleteTests, SimpleDeleteTest)
 TEST(DeleteTests, MultipleElementsDeleteTest)
 {
     rbt::RedBlackTree<int, int> tree;
-    std::array arr{10, 85, 15, 70, 20, 60, 30, 50, 65, 80, 90, 40, 5, 55, 45};
+    constexpr std::array arr{10, 85, 15, 70, 20, 60, 30, 50, 65, 80, 90, 40, 5, 55, 45};
 
     // Insertion.
     for (const int& e : arr) {
@@ -45,8 +46,8 @@ TEST(DeleteTests, MultipleElementsDeleteTest)
 
     // Deletion.
     for (const int& e : arr) {
-        auto flag = tree.Erase(e);
-        ASSERT_EQ(flag, true);
+        const auto is_deleted = tree.Erase(e);
+        ASSERT_EQ(is_deleted, true);
 #ifdef DEBUG
         ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
 #endif
@@ -55,13 +56,16 @@ TEST(DeleteTests, MultipleElementsDeleteTest)
 
 TEST(DeleteTests, OrderedElementsDeleteTests)
 {
+    constexpr int size = 1000;
     rbt::RedBlackTree<int, int> tree;
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < size; i++) {
         tree.Insert(i, i * i);
     }
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < size; i++) {
         tree.Erase(i);
+        const auto value = tree.GetValue(i);
+        ASSERT_EQ(value.has_value(), false);
         ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
     }
     ASSERT_EQ(tree.IsEmpty(), true);
@@ -69,6 +73,7 @@ TEST(DeleteTests, OrderedElementsDeleteTests)
 
 TEST(PerformanceTests, MultipleRandomElementsDeleteTest)
 {
+    constexpr int size = 1000;
     rbt::RedBlackTree<int, int> tree;
 
     // Insertion.
@@ -76,14 +81,18 @@ TEST(PerformanceTests, MultipleRandomElementsDeleteTest)
     std::mt19937 mt(rd());
     std::uniform_int_distribution dist(10000, 99999);
 
-    for (int i = 0; i < 1000; ++i) {
-        int random_number = dist(mt);
+    for (int i = 0; i < size; ++i) {
+        const int random_number = dist(mt);
         tree.Insert(random_number, random_number * 2);
     }
 
     // Deletion.
-    for (int i = 0; i < 1000; ++i) {
-        int random_number = dist(mt);
-        tree.Erase(random_number);
+    for (int i = 0; i < size; ++i) {
+        const int random_number = dist(mt);
+        if (const bool is_deleted = tree.Erase(random_number)) {
+            const auto value = tree.GetValue(random_number);
+            ASSERT_EQ(value.has_value(), false);
+        }
+        ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
     }
 }
