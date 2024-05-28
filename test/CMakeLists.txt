@@ -1,4 +1,4 @@
-message(STATUS "Building tests...")
+message(STATUS "Building red black tree tests.")
 enable_testing()
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -11,11 +11,11 @@ include(GoogleTest)
 add_executable(
     red_black_tree_insert_test
     red_black_tree_insert_test.cpp
-)
+    test_main.cpp)
 add_executable(
     red_black_tree_delete_test
     red_black_tree_delete_test.cpp
-)
+    test_main.cpp)
 
 target_compile_definitions(red_black_tree_insert_test PRIVATE $<$<CONFIG:Debug>:DEBUG>)
 target_compile_definitions(red_black_tree_delete_test PRIVATE $<$<CONFIG:Debug>:DEBUG>)
