@@ -1,4 +1,6 @@
 #include "red_black_tree.h"
+#include <spdlog/spdlog.h>
+#include <stack>
 
 #ifdef DEBUG
 #include <iostream>
@@ -6,7 +8,6 @@
 #include <sstream>
 #endif
 
-#include <stack>
 
 namespace rbt
 {
