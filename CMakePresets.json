@@ -2,22 +2,59 @@
   "version": 3,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 19,
+    "minor": 28,
     "patch": 0
   },
   "configurePresets": [
     {
-      "name": "windows test",
-      "displayName": "Windows Test",
-      "description": "Test on windows platform",
-      "hidden": false,
-      "generator": "Ninja",
+      "name": "windows base",
+      "hidden": true,
+      "generator": "Visual Studio 17 2022",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true
+      }
+    },
+    {
+      "name": "windows test base",
+      "hidden": true,
+      "inherits": "windows base",
+      "description": "The test base on windows platform",
+      "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
-        "BUILD_TESTS": "YES",
-        "BUILD_BENCHMARK": "NO"
+        "BUILD_TESTS": true,
+        "BUILD_BENCHMARK": false
+      }
+    },
+    {
+      "name": "windows debug test",
+      "displayName": "Windows Debug Test",
+      "description": "Debug test on windows platform",
+      "hidden": false,
+      "inherits": "windows test base",
+      "cacheVariables": {
+        "LOG_LEVEL": "DEBUG"
+      }
+    },
+    {
+      "name": "windows trace test",
+      "displayName": "Windows Trace Test",
+      "description": "Trace test on windows platform",
+      "hidden": false,
+      "inherits": "windows test base",
+      "cacheVariables": {
+        "LOG_LEVEL": "TRACE"
+      }
+    },
+    {
+      "name": "windows benchmark",
+      "displayName": "Windows Benchmark",
+      "description": "The benchmark on windows platform",
+      "inherits": "windows base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTS": false,
+        "BUILD_BENCHMARK": true
       }
     }
   ]

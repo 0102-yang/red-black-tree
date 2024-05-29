@@ -1,9 +1,9 @@
+import <array>;
+import <random>;
+
 #include <gtest/gtest.h>
 
-#include <array>
-#include <random>
-
-#include "red_black_tree.h"
+import red_black_tree;
 
 TEST(DeleteTests, SimpleDeleteTest)
 {

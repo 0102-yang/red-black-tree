@@ -1,9 +1,9 @@
-#include <chrono>
-#include <iostream>
-#include <map>
-#include <random>
+import <chrono>;
+import <iostream>;
+import <map>;
+import <random>;
 
-#include "red_black_tree.h"
+import red_black_tree;
 
 int main()
 {

@@ -1,13 +1,16 @@
-#include "red_black_tree.h"
-#include <spdlog/spdlog.h>
-#include <stack>
+import <stack>;
 
 #ifdef DEBUG
-#include <iostream>
-#include <queue>
-#include <sstream>
+import <iostream>;
+import <queue>;
+import <sstream>;
 #endif
 
+#include "red_black_tree.h"
+
+#include <spdlog/spdlog.h>
+
+import red_black_tree;
 
 namespace rbt
 {
@@ -57,8 +60,7 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
 
     // Insertion.
     size_++;
-    node = new RedBlackTreeNode{.Key = key, .Value = value, .Color = ColorType::
-        Red};
+    node = new RedBlackTreeNode{.Key = key, .Value = value, .Color = ColorType::Red};
     if (key_comparator_(key, parent_node->Key)) {
         parent_node->Left = node;
     } else {
@@ -96,8 +98,7 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
     while (node) {
         if (IsBlackNode(node, false)) {
             // Node is black, need to change node's color to red somehow.
-            RedBlackTreeNode* sibling_node = parent_node ? (parent_node->Left == node ? parent_node->
-                Right : parent_node->Left) : nullptr;
+            RedBlackTreeNode* sibling_node = parent_node ? (parent_node->Left == node ? parent_node->Right : parent_node->Left) : nullptr;
             if (is_red_node(sibling_node)) {
                 // Sibling_node are red, node is black,
                 // need rotate.
@@ -118,7 +119,7 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
                     // First rotation.
                     if (key_comparator_(node->Key, parent_node->Key) == key_comparator_(sibling_node_red_child->Key, sibling_node->Key)) {
                         HandleRotation(sibling_node, sibling_node_red_child);
-                        HandleReconnection(parent_node, sibling_node_red_child);  // NOLINT
+                        HandleReconnection(parent_node, sibling_node_red_child); // NOLINT
                         is_unique_rotate = false;
                     }
 
@@ -251,7 +252,7 @@ void RED_BLACK_TREE_TYPE::PrintTree()
         }
 
         if (std::all_of(line.begin(), line.end(), [](const auto& node) { return node == nullptr; })) {
-            goto end;  // NOLINT
+            goto end; // NOLINT
         }
 
         size_t count = 0;
@@ -286,6 +287,7 @@ bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
     }
 
     if (root_->Color != ColorType::Black) {
+        spdlog::warn("Violate rule 1: Root is not black.");
         return false;
     }
 
@@ -298,6 +300,7 @@ bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
         node_stack.pop();
 
         if (ptr->Color == ColorType::Red && !(IsBlackNode(ptr->Left) && IsBlackNode(ptr->Right))) {
+            spdlog::warn("Violate rule 2: Red node must not have red child.");
             return false;
         }
 
@@ -313,7 +316,13 @@ bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
     std::vector<int> all_black_path_nodes_count;
     all_black_path_nodes_count.reserve(size_);
     ComputeAllBlackPathHeight(root_, 1, all_black_path_nodes_count);
-    return std::ranges::adjacent_find(all_black_path_nodes_count, std::not_equal_to()) == all_black_path_nodes_count.end();
+
+    if (const bool rule3 = std::ranges::adjacent_find(all_black_path_nodes_count, std::not_equal_to()) == all_black_path_nodes_count.end(); !rule3) {
+        spdlog::warn("Violate rule 3: Every path from a node to a null node must contain the same number of black nodes.");
+        return false;
+    }
+
+    return true;
 }
 
 #endif
@@ -353,7 +362,7 @@ void RED_BLACK_TREE_TYPE::HandleReorient(RedBlackTreeNode* grand_grand_parent_no
 
         // Second rotation.
         is_unique_rotate ? HandleRotation(grand_parent_node, parent_node) : HandleRotation(grand_parent_node, node);
-        is_unique_rotate ? HandleReconnection(grand_grand_parent_node, parent_node) : HandleReconnection(grand_grand_parent_node, node);  // NOLINT
+        is_unique_rotate ? HandleReconnection(grand_grand_parent_node, parent_node) : HandleReconnection(grand_grand_parent_node, node); // NOLINT
 
         (is_unique_rotate ? parent_node->Color : node->Color) = ColorType::Black;
     }
