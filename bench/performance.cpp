@@ -8,6 +8,7 @@ import red_black_tree;
 int main()
 {
     constexpr int iterate_time = 10000000;
+    rbt::IntRandomNumberGenerator gen(0, 999999);
     // *********************************************
     // Ordered elements read store test.
     // *********************************************
@@ -19,7 +20,10 @@ int main()
             m.insert({i, i});
         }
         for (int i = 0; i < iterate_time; ++i) {
-            auto it = m.find(i);
+            const auto it = m.find(i);
+        }
+        for (int i = 0; i < iterate_time; ++i) {
+            const auto flag = m.erase(i);
         }
     }
     auto end_point = std::chrono::steady_clock().now();
@@ -33,7 +37,10 @@ int main()
             t.Insert(i, i);
         }
         for (int i = 0; i < iterate_time; ++i) {
-            auto [it, flag] = t.GetValue(i);
+            const auto value = t.GetValue(i);
+        }
+        for (int i = 0; i < iterate_time; ++i) {
+            const auto flag = t.Erase(i);
         }
     }
     end_point = std::chrono::steady_clock().now();
@@ -45,20 +52,21 @@ int main()
     // *********************************************
     // Random elements read store test.
     // *********************************************
-    std::mt19937 mt;
-    std::uniform_int_distribution dist(10000, 99999);
-
     // std::map.
     start_point = std::chrono::steady_clock().now();
     {
         std::map<int, int> m;
         for (int i = 0; i < iterate_time; ++i) {
-            int random_number = dist(mt);
+            const int random_number = gen();
             m.insert({random_number, random_number});
         }
         for (int i = 0; i < iterate_time; ++i) {
-            int random_number = dist(mt);
-            auto it = m.find(random_number);
+            const int random_number = gen();
+            const auto it = m.find(random_number);
+        }
+        for (int i = 0; i < iterate_time; ++i) {
+            const int random_number = gen();
+            const auto flag = m.erase(random_number);
         }
     }
     end_point = std::chrono::steady_clock().now();
@@ -69,12 +77,16 @@ int main()
     {
         rbt::RedBlackTree<int, int> t;
         for (int i = 0; i < iterate_time; ++i) {
-            int random_number = dist(mt);
+            const int random_number = gen();
             t.Insert(random_number, random_number);
         }
         for (int i = 0; i < iterate_time; ++i) {
-            int random_number = dist(mt);
-            auto [it, flag] = t.GetValue(random_number);
+            const int random_number = gen();
+            const auto value = t.GetValue(random_number);
+        }
+        for (int i = 0; i < iterate_time; ++i) {
+            const int random_number = gen();
+            const auto flag = t.Erase(random_number);
         }
     }
     end_point = std::chrono::steady_clock().now();

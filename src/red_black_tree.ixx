@@ -3,11 +3,24 @@ export module red_black_tree;
 import <concepts>;
 import <functional>;
 import <optional>;
+import <random>;
 
 #include "red_black_tree.h"
 
 export namespace rbt
 {
+
+class IntRandomNumberGenerator
+{
+public:
+    IntRandomNumberGenerator(const int min, const int max) : dist_(min, max), gen_(std::random_device()()) {}
+
+    int operator()() { return dist_(gen_); }
+
+private:
+    std::uniform_int_distribution<> dist_;
+    std::mt19937 gen_;
+};
 
 template <typename KeyType, typename Comparator>
 concept IsComparator = requires(Comparator comparator, KeyType lhs, KeyType rhs) {

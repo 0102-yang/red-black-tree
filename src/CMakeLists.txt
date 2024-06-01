@@ -1,5 +1,6 @@
 ## Build red-black-tree.
 add_library(red_black_tree OBJECT)
+target_sources(red_black_tree PRIVATE FILE_SET red_black_tree_module TYPE CXX_MODULES FILES "red_black_tree.ixx")
 target_sources(red_black_tree PRIVATE "red_black_tree.ixx" "red_black_tree.cpp")
 target_compile_options(red_black_tree
     PRIVATE
@@ -8,6 +9,7 @@ target_compile_options(red_black_tree
         >
 )
 target_compile_definitions(red_black_tree PRIVATE $<$<CONFIG:Debug>:DEBUG>)
+target_compile_features(red_black_tree PRIVATE cxx_std_23)
 
 if(LOG_LEVEL STREQUAL "DEBUG")
     target_compile_definitions(red_black_tree PUBLIC -DLOG_LEVEL=DEBUG)

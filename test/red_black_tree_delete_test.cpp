@@ -68,7 +68,7 @@ TEST(DeleteTests, OrderedElementsDeleteTests)
 TEST(DeleteTests, MultipleRandomElementsDeleteTest)
 {
     rbt::RedBlackTree<int, int> tree;
-    IntRandomNumberGenerator rng(0, 999);
+    rbt::IntRandomNumberGenerator rng(0, 999);
 
     // Insertion.
     for (int i = 0; i < test_size; ++i) {

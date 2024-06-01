@@ -89,7 +89,7 @@ TEST(InsertTests, OrderedElementsInsertTests)
 TEST(InsertTests, MultipleRandomElementsInsertTest)
 {
     rbt::RedBlackTree<int, int> tree;
-    IntRandomNumberGenerator rng(0, 999);
+    rbt::IntRandomNumberGenerator rng(0, 999);
     std::unordered_map<int, int> num_table;
 
     // Insertion.
