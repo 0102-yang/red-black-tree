@@ -3,6 +3,7 @@
 
 # Visual Studio
 /.vs
+/Testing
 
 # Jetbrain Resharper
 Folder.DotSettings.user

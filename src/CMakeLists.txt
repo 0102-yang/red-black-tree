@@ -17,5 +17,4 @@ else()
     target_compile_definitions(red_black_tree PUBLIC -DLOG_LEVEL=INFO)
 endif()
 
-target_include_directories(red_black_tree PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(red_black_tree spdlog::spdlog)

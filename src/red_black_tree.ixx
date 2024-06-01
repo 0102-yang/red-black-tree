@@ -66,11 +66,11 @@ public:
     bool Erase(const KeyType& key);
 
     /// <summary>
-    /// Get key-value pair from red-black tree.
+    /// Get value by key from red-black tree.
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns>The optional value.</returns>
-    [[nodiscard]] auto GetValue(const KeyType& key) const -> std::optional<ValueType>;
+    std::optional<ValueType> GetValue(const KeyType& key) const;
 
     /// <summary>
     /// Clear all elements from red-black tree.
@@ -131,11 +131,11 @@ private:
     void HandleRotation(RedBlackTreeNode* root, RedBlackTreeNode* sup);
 
     /// <summary>
-    /// Reconnect node and its parent.
+    /// Reconnect node and its new parent. If new_parent is nullptr, then node is the new root.
     /// </summary>
-    /// <param name="parent">The parent.</param>
+    /// <param name="new_parent">The new parent.</param>
     /// <param name="node">The node.</param>
-    void HandleReconnection(RedBlackTreeNode* parent, RedBlackTreeNode* node);
+    void HandleReconnection(RedBlackTreeNode* new_parent, RedBlackTreeNode* node);
 
     /// <summary>
     /// Check if a node's color is black.

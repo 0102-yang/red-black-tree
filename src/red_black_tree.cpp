@@ -1,3 +1,4 @@
+import <optional>;
 import <stack>;
 
 #ifdef DEBUG
@@ -27,13 +28,6 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
 {
-    // If root is null.
-    if (!root_) {
-        root_ = new RedBlackTreeNode{.Key = key, .Value = value, .Color = ColorType::Black};
-        size_++;
-        return true;
-    }
-
     /**
      * Insert key-value pair into red black tree.
      */
@@ -61,6 +55,12 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
     // Insertion.
     size_++;
     node = new RedBlackTreeNode{.Key = key, .Value = value, .Color = ColorType::Red};
+    if (!root_) [[unlikely]] {
+        node->Color = ColorType::Black;
+        root_ = node;
+        return true;
+    }
+
     if (key_comparator_(key, parent_node->Key)) {
         parent_node->Left = node;
     } else {
@@ -77,36 +77,58 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
 {
-    auto find_min_leaf_node = [](RedBlackTreeNode* root) -> RedBlackTreeNode* {
-        while (root->Left) {
-            root = root->Left;
-        }
-        return root;
-    };
-    auto find_max_leaf_node = [](RedBlackTreeNode* root) -> RedBlackTreeNode* {
+#if LOG_LEVEL == TRACE
+    spdlog::trace("Before delete {}:", key);
+    PrintTree();
+#endif
+
+    const auto is_red_node = [](RedBlackTreeNode* n) { return n && n->Color == ColorType::Red; };
+
+    const auto find_max_leaf_node = [](RedBlackTreeNode* root) -> RedBlackTreeNode* {
         while (root->Right) {
             root = root->Right;
         }
         return root;
     };
-    auto is_red_node = [](RedBlackTreeNode* n) { return n && n->Color == ColorType::Red; };
+
+    const auto get_sibling_node = [](RedBlackTreeNode* parent_node, RedBlackTreeNode* node) {
+        return parent_node ? (parent_node->Left == node ? parent_node->Right : parent_node->Left) : nullptr;
+    };
+
+    /*
+     * Consider whether to recolor the root node to red first.
+     * If both left and right child are black, recolor root to red.
+     */
+    if (IsBlackNode(root_->Left) && IsBlackNode(root_->Right)) {
+        root_->Color = ColorType::Red;
+    }
+
+#if LOG_LEVEL == TRACE
+    spdlog::trace("After recolor root to red.");
+    PrintTree();
+#endif
 
     RedBlackTreeNode* node = root_;
     RedBlackTreeNode* parent_node = nullptr;
     RedBlackTreeNode* grand_parent_node = nullptr;
-    node->Color = ColorType::Red;
+    KeyType deleted_key = key;
+
     while (node) {
-        if (IsBlackNode(node, false)) {
-            // Node is black, need to change node's color to red somehow.
-            RedBlackTreeNode* sibling_node = parent_node ? (parent_node->Left == node ? parent_node->Right : parent_node->Left) : nullptr;
-            if (is_red_node(sibling_node)) {
-                // Sibling_node are red, node is black,
-                // need rotate.
+        /*
+         * Recolor current node to red first.
+         */
+        if (node->Color == ColorType::Black) {
+            RedBlackTreeNode* sibling_node = get_sibling_node(parent_node, node);
+
+            if (IsBlackNode(parent_node) && is_red_node(sibling_node)) {
                 HandleRotation(parent_node, sibling_node);
                 HandleReconnection(grand_parent_node, sibling_node);
-                sibling_node->Color = ColorType::Black;
                 parent_node->Color = ColorType::Red;
-                continue;
+                sibling_node->Color = ColorType::Black;
+
+                // Update sibling node and grand parent node.
+                grand_parent_node = sibling_node;
+                sibling_node = get_sibling_node(parent_node, node);
             }
 
             if (IsBlackNode(node->Left) && IsBlackNode(node->Right)) {
@@ -117,7 +139,8 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
                     bool is_unique_rotate = true;
 
                     // First rotation.
-                    if (key_comparator_(node->Key, parent_node->Key) == key_comparator_(sibling_node_red_child->Key, sibling_node->Key)) {
+                    if ((key_comparator_(node->Key, parent_node->Key) || node->Key == parent_node->Key)
+                        == (key_comparator_(sibling_node_red_child->Key, sibling_node->Key) || sibling_node_red_child->Key == sibling_node->Key)) {
                         HandleRotation(sibling_node, sibling_node_red_child);
                         HandleReconnection(parent_node, sibling_node_red_child); // NOLINT
                         is_unique_rotate = false;
@@ -146,51 +169,74 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
             }
         }
 
-        bool is_replaced = false;
-        if (node->Key == key) {
-            if (!node->Left && !node->Right) {
-                // Node is a leaf node, just delete node.
-                if (parent_node) {
-                    // Deleted node is not root.
-                    (parent_node->Left == node ? parent_node->Left : parent_node->Right) = nullptr;
-                } else {
-                    // Deleted node is root and node is the unique node.
-                    root_ = nullptr;
-                }
+#if LOG_LEVEL == TRACE
+        spdlog::trace("After recolor current key {}.", node->Key);
+        PrintTree();
+#endif
 
-                // Delete.
-                delete node;
-                size_--;
+        /*
+         * Handle delete.
+         * Precondition: node is red.
+         */
+        if (deleted_key == node->Key) {
+            if (node->Left && node->Right) {
+                // Node has two children.
+                // Replace current node to the predecessor node.
+                const auto replaced_node = find_max_leaf_node(node->Left);
+                deleted_key = node->Key = replaced_node->Key;
+                node->Value = replaced_node->Value;
 
-                // Tail work.
-                if (root_) {
-                    root_->Color = ColorType::Black;
-                }
-                return true;
+                grand_parent_node = parent_node;
+                parent_node = node;
+                node = node->Left;
+                continue;
             }
 
-            // Note: It might be possible to minimize copy cost assumption.
-            // Node is an internal node.
-            // Need to replace node with its successor or predecessor.
-            auto replace_node = node->Right ? find_min_leaf_node(node->Right) : find_max_leaf_node(node->Left);
-            std::swap(node->Key, replace_node->Key);
-            std::swap(node->Value, replace_node->Value);
-            is_replaced = true;
+            // Node has zero or one child.
+            // 1. If node has one child, node must be a black node, child node must be a red node.
+            // 2. If node has zero child, we previously make sure node is red.
+            RedBlackTreeNode* child_node = nullptr;
+            if (node->Left || node->Right) {
+                child_node = node->Left ? node->Left : node->Right;
+                child_node->Color = ColorType::Black;
+            }
+
+            if (node == root_) [[unlikely]] {
+                root_ = child_node;
+            } else [[likely]] {
+                if (key_comparator_(node->Key, parent_node->Key) || node->Key == parent_node->Key) {
+                    parent_node->Left = child_node;
+                } else {
+                    parent_node->Right = child_node;
+                }
+            }
+
+            delete node;
+            size_--;
+            if (root_) {
+                root_->Color = ColorType::Black;
+            }
+
+#if LOG_LEVEL == TRACE
+            spdlog::trace("After delete {}:", key);
+            PrintTree();
+#endif
+            return true;
         }
 
         // Iteration.
         grand_parent_node = parent_node;
         parent_node = node;
-        node = key_comparator_(key, node->Key) ^ is_replaced ? node->Left : node->Right;
+        node = NextNode(node, deleted_key);
     }
 
-    root_->Color = ColorType::Black;
+    if (root_) {
+        root_->Color = ColorType::Black;
+    }
     return false;
 }
 
-RED_BLACK_TREE_TEMPLATE_ARGUMENT
-RED_BLACK_TREE_REQUIRES
-auto RED_BLACK_TREE_TYPE::GetValue(const KeyType& key) const -> std::optional<ValueType>
+RED_BLACK_TREE_TEMPLATE_ARGUMENT RED_BLACK_TREE_REQUIRES std::optional<ValueType> RED_BLACK_TREE_TYPE::GetValue(const KeyType& key) const
 {
     RedBlackTreeNode* ptr = root_;
 
@@ -312,13 +358,13 @@ bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
         }
     }
 
-    // 3. Every path from a node to a null node must contain the same number of black nodes.
+    // 3. Every path from root node to every null node must contain the same number of black nodes.
     std::vector<int> all_black_path_nodes_count;
     all_black_path_nodes_count.reserve(size_);
     ComputeAllBlackPathHeight(root_, 1, all_black_path_nodes_count);
 
     if (const bool rule3 = std::ranges::adjacent_find(all_black_path_nodes_count, std::not_equal_to()) == all_black_path_nodes_count.end(); !rule3) {
-        spdlog::warn("Violate rule 3: Every path from a node to a null node must contain the same number of black nodes.");
+        spdlog::warn("Violate rule 3: Every path from root node to every null node must contain the same number of black nodes.");
         return false;
     }
 
@@ -392,11 +438,11 @@ void RED_BLACK_TREE_TYPE::HandleRotation(RedBlackTreeNode* root, RedBlackTreeNod
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
-void RED_BLACK_TREE_TYPE::HandleReconnection(RedBlackTreeNode* parent, RedBlackTreeNode* node)
+void RED_BLACK_TREE_TYPE::HandleReconnection(RedBlackTreeNode* new_parent, RedBlackTreeNode* node)
 {
-    if (parent) {
+    if (new_parent) {
         // Just reconnect to parent.
-        (key_comparator_(node->Key, parent->Key) ? parent->Left : parent->Right) = node;
+        (key_comparator_(node->Key, new_parent->Key) ? new_parent->Left : new_parent->Right) = node;
     } else {
         // Need to reconnect to root_.
         root_ = node;
