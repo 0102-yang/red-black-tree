@@ -1,6 +1,6 @@
 #pragma once
 
-import <array>;
+#include <array>
 
 constexpr int test_size = 1000;
 // Array from Data Structures and Algorithm Analysis in C++ (Fourth Edition) by Mark Allen Weiss.

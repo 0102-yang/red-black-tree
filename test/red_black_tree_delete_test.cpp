@@ -1,11 +1,10 @@
-import <array>;
-import <random>;
+#include <array>
+#include <random>
 
 #include <gtest/gtest.h>
 
 #include "test_constant.h"
-
-import red_black_tree;
+#include "red_black_tree.h"
 
 TEST(DeleteTests, SimpleDeleteTest)
 {

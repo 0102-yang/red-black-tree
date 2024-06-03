@@ -1,17 +1,15 @@
-import <optional>;
-import <stack>;
+#include <optional>
+#include <stack>
 
 #ifdef DEBUG
-import <iostream>;
-import <queue>;
-import <sstream>;
+#include <iostream>
+#include <queue>
+#include <sstream>
 #endif
 
 #include "red_black_tree.h"
 
 #include <spdlog/spdlog.h>
-
-import red_black_tree;
 
 namespace rbt
 {
@@ -77,7 +75,7 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
 {
-#if LOG_LEVEL == TRACE
+#ifdef TRACE
     spdlog::trace("Before delete {}:", key);
     PrintTree();
 #endif
@@ -103,7 +101,7 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
         root_->Color = ColorType::Red;
     }
 
-#if LOG_LEVEL == TRACE
+#ifdef TRACE
     spdlog::trace("After recolor root to red.");
     PrintTree();
 #endif
@@ -169,7 +167,7 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
             }
         }
 
-#if LOG_LEVEL == TRACE
+#ifdef TRACE
         spdlog::trace("After recolor current key {}.", node->Key);
         PrintTree();
 #endif
@@ -217,7 +215,7 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
                 root_->Color = ColorType::Black;
             }
 
-#if LOG_LEVEL == TRACE
+#ifdef TRACE
             spdlog::trace("After delete {}:", key);
             PrintTree();
 #endif

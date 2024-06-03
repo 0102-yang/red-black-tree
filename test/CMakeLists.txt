@@ -20,8 +20,8 @@ add_executable(
 target_compile_definitions(red_black_tree_insert_test PRIVATE $<$<CONFIG:Debug>:DEBUG>)
 target_compile_definitions(red_black_tree_delete_test PRIVATE $<$<CONFIG:Debug>:DEBUG>)
 
-target_link_libraries(red_black_tree_insert_test red_black_tree gtest gtest_main)
-target_link_libraries(red_black_tree_delete_test red_black_tree gtest gtest_main)
+target_link_libraries(red_black_tree_insert_test PRIVATE red_black_tree PRIVATE gtest PRIVATE gtest_main)
+target_link_libraries(red_black_tree_delete_test PRIVATE red_black_tree PRIVATE gtest PRIVATE gtest_main)
 
 gtest_discover_tests(red_black_tree_insert_test)
 gtest_discover_tests(red_black_tree_delete_test)

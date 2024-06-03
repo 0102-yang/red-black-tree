@@ -1,9 +1,8 @@
-import <chrono>;
-import <iostream>;
-import <map>;
-import <random>;
+#include <chrono>
+#include <iostream>
+#include <map>
 
-import red_black_tree;
+#include "red_black_tree.h"
 
 int main()
 {
@@ -13,11 +12,11 @@ int main()
     // Ordered elements read store test.
     // *********************************************
     // std::map.
-    auto start_point = std::chrono::steady_clock().now();
+    auto start_point = std::chrono::steady_clock::now();
     {
         std::map<int, int> m;
         for (int i = 0; i < iterate_time; ++i) {
-            m.insert({i, i});
+            m.emplace(i, i);
         }
         for (int i = 0; i < iterate_time; ++i) {
             const auto it = m.find(i);
@@ -26,11 +25,11 @@ int main()
             const auto flag = m.erase(i);
         }
     }
-    auto end_point = std::chrono::steady_clock().now();
+    auto end_point = std::chrono::steady_clock::now();
     auto map_time = std::chrono::duration<double>(end_point - start_point).count();
 
     // red-black-tree.
-    start_point = std::chrono::steady_clock().now();
+    start_point = std::chrono::steady_clock::now();
     {
         rbt::RedBlackTree<int, int> t;
         for (int i = 0; i < iterate_time; ++i) {
@@ -43,22 +42,22 @@ int main()
             const auto flag = t.Erase(i);
         }
     }
-    end_point = std::chrono::steady_clock().now();
+    end_point = std::chrono::steady_clock::now();
     auto tree_time = std::chrono::duration<double>(end_point - start_point).count();
 
-    std::cout << "Ordered elements: Map time is " << map_time << " second(s).\n";
-    std::cout << "Ordered elements: Tree time is " << tree_time << " second(s).\n";
+    std::cout << std::format("Ordered insert-delete {} elements: Map time is {} second(s).\n", iterate_time, map_time);
+    std::cout << std::format("Ordered insert-delete {} elements: Tree time is {} second(s).\n", iterate_time, tree_time);
 
     // *********************************************
     // Random elements read store test.
     // *********************************************
     // std::map.
-    start_point = std::chrono::steady_clock().now();
+    start_point = std::chrono::steady_clock::now();
     {
         std::map<int, int> m;
         for (int i = 0; i < iterate_time; ++i) {
             const int random_number = gen();
-            m.insert({random_number, random_number});
+            m.emplace(random_number, random_number);
         }
         for (int i = 0; i < iterate_time; ++i) {
             const int random_number = gen();
@@ -69,11 +68,11 @@ int main()
             const auto flag = m.erase(random_number);
         }
     }
-    end_point = std::chrono::steady_clock().now();
+    end_point = std::chrono::steady_clock::now();
     map_time = std::chrono::duration<double>(end_point - start_point).count();
 
     // red-black-tree.
-    start_point = std::chrono::steady_clock().now();
+    start_point = std::chrono::steady_clock::now();
     {
         rbt::RedBlackTree<int, int> t;
         for (int i = 0; i < iterate_time; ++i) {
@@ -89,9 +88,9 @@ int main()
             const auto flag = t.Erase(random_number);
         }
     }
-    end_point = std::chrono::steady_clock().now();
+    end_point = std::chrono::steady_clock::now();
     tree_time = std::chrono::duration<double>(end_point - start_point).count();
 
-    std::cout << "Random elements: Map time is " << map_time << " second(s).\n";
-    std::cout << "Random elements: Tree time is " << tree_time << " second(s).\n";
+    std::cout << std::format("Random insert-delete {} elements: Map time is {} second(s).\n", iterate_time, map_time);
+    std::cout << std::format("Random insert-delete {} elements: Tree time is {} second(s).\n", iterate_time, tree_time);
 }
