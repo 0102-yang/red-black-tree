@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(RedBlackTree LANGUAGES CXX VERSION 1.0)
 
-message(STATUS "Build operating System: ${CMAKE_SYSTEM}")
+message(STATUS "Build operating system: ${CMAKE_SYSTEM}")
 message(STATUS "Build mode: ${CMAKE_BUILD_TYPE}")
 message(STATUS "C++ compile flags (Debug): ${CMAKE_CXX_FLAGS_DEBUG}")
 message(STATUS "C++ compile flags (Release): ${CMAKE_CXX_FLAGS_RELEASE}")
@@ -19,6 +19,7 @@ add_subdirectory(src)
 
 # Enable test.
 if(BUILD_TESTS)
+    enable_testing()
     add_subdirectory(third_party/googletest)
     add_subdirectory(test)
 endif()
