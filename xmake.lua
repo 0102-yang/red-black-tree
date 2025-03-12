@@ -1,4 +1,4 @@
-set_project("CppTest")
+set_project("Red Black Tree")
 set_version("1.0.0")
 
 add_rules("mode.debug", "mode.release")
