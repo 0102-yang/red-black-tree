@@ -1,3 +1,7 @@
+#include "red_black_tree.h"
+
+#include <spdlog/spdlog.h>
+
 #include <optional>
 #include <stack>
 
@@ -6,10 +10,6 @@
 #include <queue>
 #include <sstream>
 #endif
-
-#include <spdlog/spdlog.h>
-
-#include "red_black_tree.h"
 
 namespace rbt
 {
@@ -26,6 +26,11 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
 {
+#ifndef NDEBUG
+    SPDLOG_DEBUG("\nBefore insert {}:", key);
+    PrintTree();
+#endif
+
     /**
      * Insert key-value pair into red black tree.
      */
@@ -68,6 +73,11 @@ bool RED_BLACK_TREE_TYPE::Insert(const KeyType& key, const ValueType& value)
     // Check whether reorient is required.
     HandleReorient(grand_grand_parent_node, grand_parent_node, parent_node, node);
 
+#ifndef NDEBUG
+    SPDLOG_DEBUG("\nAfter insert {}:", key);
+    PrintTree();
+#endif
+
     return true;
 }
 
@@ -75,8 +85,8 @@ RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
 {
-#ifdef TRACE
-    spdlog::trace("Before delete {}:", key);
+#ifndef NDEBUG
+    SPDLOG_DEBUG("\nBefore delete {}:", key);
     PrintTree();
 #endif
 
@@ -101,8 +111,8 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
         root_->Color = ColorType::Red;
     }
 
-#ifdef TRACE
-    spdlog::trace("After recolor root to red.");
+#ifndef NDEBUG
+    SPDLOG_DEBUG("\nAfter recolor root to red.");
     PrintTree();
 #endif
 
@@ -167,8 +177,8 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
             }
         }
 
-#ifdef TRACE
-        spdlog::trace("After recolor current key {}.", node->Key);
+#ifndef NDEBUG
+        SPDLOG_DEBUG("\nAfter recolor current key {}.", node->Key);
         PrintTree();
 #endif
 
@@ -215,10 +225,11 @@ bool RED_BLACK_TREE_TYPE::Erase(const KeyType& key)
                 root_->Color = ColorType::Black;
             }
 
-#ifdef TRACE
-            spdlog::trace("After delete {}:", key);
+#ifndef NDEBUG
+            SPDLOG_DEBUG("\nAfter delete {}:", key);
             PrintTree();
 #endif
+
             return true;
         }
 
@@ -278,12 +289,11 @@ void RED_BLACK_TREE_TYPE::Clear()
     size_ = 0;
 }
 
-#ifndef NDEBUG
-
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
 void RED_BLACK_TREE_TYPE::PrintTree()
 {
+#ifndef NDEBUG
     std::ostringstream os;
     std::queue<RedBlackTreeNode*> print_queue;
     print_queue.push(root_);
@@ -296,7 +306,7 @@ void RED_BLACK_TREE_TYPE::PrintTree()
         }
 
         if (std::all_of(line.begin(), line.end(), [](const auto& node) { return node == nullptr; })) {
-            goto end; // NOLINT
+            break;
         }
 
         size_t count = 0;
@@ -317,9 +327,9 @@ void RED_BLACK_TREE_TYPE::PrintTree()
         os << '\n';
     }
 
-end:
-    spdlog::trace("{}\n", os.str());
-    // std::cout << os.str() << '\n';
+    os << '\n';
+    std::cout << os.str();
+#endif
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
@@ -332,7 +342,7 @@ bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
     }
 
     if (root_->Color != ColorType::Black) {
-        spdlog::warn("Violate rule 1: Root is not black.");
+        spdlog::error("Violate rule 1: Root is not black.");
         return false;
     }
 
@@ -345,7 +355,7 @@ bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
         node_stack.pop();
 
         if (ptr->Color == ColorType::Red && !(IsBlackNode(ptr->Left) && IsBlackNode(ptr->Right))) {
-            spdlog::warn("Violate rule 2: Red node must not have red child.");
+            spdlog::error("Violate rule 2: Red node must not have red child.");
             return false;
         }
 
@@ -363,14 +373,12 @@ bool RED_BLACK_TREE_TYPE::RedBlackTreeRulesCheck()
     ComputeAllBlackPathHeight(root_, 1, all_black_path_nodes_count);
 
     if (const bool rule3 = std::ranges::adjacent_find(all_black_path_nodes_count, std::not_equal_to()) == all_black_path_nodes_count.end(); !rule3) {
-        spdlog::warn("Violate rule 3: Every path from root node to every null node must contain the same number of black nodes.");
+        spdlog::error("Violate rule 3: Every path from root node to every null node must contain the same number of black nodes.");
         return false;
     }
 
     return true;
 }
-
-#endif
 
 /**
  * Private methods.

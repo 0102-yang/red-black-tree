@@ -6,12 +6,10 @@ class MyTestEnvironment final : public testing::Environment
 public:
     void SetUp() override
     {
-#if LOG_LEVEL == DEBUG
-        spdlog::set_level(spdlog::level::debug);
-#elif LOG_LEVEL == TRACE
-        spdlog::set_level(spdlog::level::trace);
-#else
+#ifdef NDEBUG
         spdlog::set_level(spdlog::level::info);
+#else
+        spdlog::set_level(spdlog::level::debug);
 #endif
     }
 };

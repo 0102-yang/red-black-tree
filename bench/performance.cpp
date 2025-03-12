@@ -1,3 +1,5 @@
+#include <spdlog/spdlog.h>
+
 #include <chrono>
 #include <iostream>
 #include <map>
@@ -6,6 +8,10 @@
 
 int main()
 {
+#ifndef NDEBUG
+    spdlog::warn("Running benchmark in debug mode is not recommended.");
+#endif
+
     constexpr int iterate_time = 10000000;
     rbt::IntRandomNumberGenerator gen(0, 999999);
     // *********************************************

@@ -1,10 +1,7 @@
-#include <array>
-#include <random>
-
 #include <gtest/gtest.h>
 
-#include "test_constant.h"
 #include "red_black_tree.h"
+#include "test_constant.h"
 
 TEST(DeleteTests, SimpleDeleteTest)
 {
@@ -13,22 +10,22 @@ TEST(DeleteTests, SimpleDeleteTest)
     tree.Insert(100, 100);
 
     // Deletion.
-    ASSERT_EQ(tree.Erase(65), false);
-    ASSERT_EQ(tree.Erase(42), true);
+    ASSERT_FALSE(tree.Erase(65));
+    ASSERT_TRUE(tree.Erase(42));
     ASSERT_TRUE(tree.RedBlackTreeRulesCheck());
     {
         const auto value = tree.GetValue(42);
-        ASSERT_EQ(value.has_value(), false);
+        ASSERT_FALSE(value.has_value());
     }
     {
         const auto value = tree.GetValue(100);
-        ASSERT_EQ(value.has_value(), true);
+        ASSERT_TRUE(value.has_value());
     }
     ASSERT_EQ(tree.Size(), 1);
 
-    tree.Erase(100);
+    ASSERT_TRUE(tree.Erase(100));
     ASSERT_TRUE(tree.RedBlackTreeRulesCheck());
-    ASSERT_EQ(tree.IsEmpty(), true);
+    ASSERT_TRUE(tree.IsEmpty());
 }
 
 TEST(DeleteTests, MultipleElementsDeleteTest)
@@ -42,9 +39,8 @@ TEST(DeleteTests, MultipleElementsDeleteTest)
 
     // Deletion.
     for (const int& e : classic_array) {
-        const auto is_deleted = tree.Erase(e);
-        ASSERT_EQ(is_deleted, true);
-        ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
+        ASSERT_TRUE(tree.Erase(e));
+        ASSERT_TRUE(tree.RedBlackTreeRulesCheck());
     }
 }
 
@@ -56,12 +52,13 @@ TEST(DeleteTests, OrderedElementsDeleteTests)
     }
 
     for (int i = 0; i < test_size; i++) {
-        tree.Erase(i);
+        ASSERT_TRUE(tree.Erase(i));
         const auto value = tree.GetValue(i);
-        ASSERT_EQ(value.has_value(), false);
-        ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
+        ASSERT_FALSE(value.has_value());
+        ASSERT_EQ(tree.Size(), test_size - i - 1);
+        ASSERT_TRUE(tree.RedBlackTreeRulesCheck());
     }
-    ASSERT_EQ(tree.IsEmpty(), true);
+    ASSERT_TRUE(tree.IsEmpty());
 }
 
 TEST(DeleteTests, MultipleRandomElementsDeleteTest)
@@ -79,8 +76,8 @@ TEST(DeleteTests, MultipleRandomElementsDeleteTest)
     for (int i = 0; i < test_size; ++i) {
         if (const int random_number = rng(); tree.Erase(random_number)) {
             const auto value = tree.GetValue(random_number);
-            ASSERT_EQ(value.has_value(), false);
-            ASSERT_EQ(tree.RedBlackTreeRulesCheck(), true);
+            ASSERT_FALSE(value.has_value());
+            ASSERT_TRUE(tree.RedBlackTreeRulesCheck());
         }
     }
 }

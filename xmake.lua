@@ -17,6 +17,7 @@ target("red-black-tree")
   if is_mode("debug") then
     set_symbols("debug")
     set_optimize("none")
+    add_defines("SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG")
   end
 
   set_kind("static")
@@ -54,13 +55,10 @@ target("delete-test")
 target_end()
 
 target("bench-mark")
-  if is_mode("debug") then
-    print("Warning: Bench-marking in debug mode is not optimized and recommended.")
-  end
-  
   set_symbols("hidden")
   set_optimize("fastest")
   set_kind("binary")
   add_files("bench/performance.cpp")
   add_deps("red-black-tree")
+  add_packages("spdlog")
 target_end()

@@ -5,6 +5,9 @@
 /.vs
 /Testing
 
+# Visual Studio Code
+/.vscode
+
 # Jetbrain Resharper
 Folder.DotSettings.user
 

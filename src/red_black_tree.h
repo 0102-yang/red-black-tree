@@ -102,7 +102,6 @@ public:
     /// <returns>The size.</returns>
     [[nodiscard]] auto Size() const -> size_t { return size_; }
 
-#ifndef NDEBUG
     /**
      * For Debug only.
      */
@@ -117,8 +116,6 @@ public:
     /// </summary>
     /// <returns>True for check success.</returns>
     bool RedBlackTreeRulesCheck();
-
-#endif
 
 private:
     RedBlackTreeNode* root_ = nullptr;
