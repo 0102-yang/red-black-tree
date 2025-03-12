@@ -26,9 +26,7 @@ private:
 
 template <typename KeyType, typename Comparator>
 concept IsComparator = requires(Comparator comparator, KeyType lhs, KeyType rhs) {
-    {
-        comparator(lhs, rhs)
-    } -> std::convertible_to<bool>;
+    { comparator(lhs, rhs) } -> std::convertible_to<bool>;
 };
 
 template <typename KeyType, typename ValueType, class KeyComparator = std::less<KeyType>> RED_BLACK_TREE_REQUIRES class RedBlackTree
@@ -104,7 +102,7 @@ public:
     /// <returns>The size.</returns>
     [[nodiscard]] auto Size() const -> size_t { return size_; }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     /**
      * For Debug only.
      */

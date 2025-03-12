@@ -1,0 +1,14 @@
+{
+    "name": "Red Black Tree Development",
+    "image": "mcr.microsoft.com/devcontainers/cpp:dev-ubuntu-24.04",
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "extensions": [
+        "ms-vscode.cpptools",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "tboox.xmake-vscode"
+    ],
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends clangd",
+    "remoteUser": "vscode"
+}

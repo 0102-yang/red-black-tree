@@ -1,15 +1,15 @@
 #include <optional>
 #include <stack>
 
-#ifdef DEBUG
+#ifndef NDEBUG
 #include <iostream>
 #include <queue>
 #include <sstream>
 #endif
 
-#include "red_black_tree.h"
-
 #include <spdlog/spdlog.h>
+
+#include "red_black_tree.h"
 
 namespace rbt
 {
@@ -278,7 +278,7 @@ void RED_BLACK_TREE_TYPE::Clear()
     size_ = 0;
 }
 
-#ifdef DEBUG
+#ifndef NDEBUG
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT
 RED_BLACK_TREE_REQUIRES
@@ -318,7 +318,8 @@ void RED_BLACK_TREE_TYPE::PrintTree()
     }
 
 end:
-    std::cout << os.str() << '\n';
+    spdlog::trace("{}\n", os.str());
+    // std::cout << os.str() << '\n';
 }
 
 RED_BLACK_TREE_TEMPLATE_ARGUMENT

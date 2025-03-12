@@ -7,3 +7,9 @@
 
 # Jetbrain Resharper
 Folder.DotSettings.user
+
+# XMake
+/.xmake
+
+# Clangd
+/.cache
